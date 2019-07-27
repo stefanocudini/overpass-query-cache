@@ -1,6 +1,7 @@
 
 
 import _ from 'lodash';
+import $ from 'jquery';
 import 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw';
@@ -36,7 +37,7 @@ L.Icon.Default.mergeOptions({
 window.map = L.map('map', {
 	layers: L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
 	center: [46.0740,11.1476],
-	zoom: 12
+	zoom: 14
 });
 
 var rr = L.featureGroup().addTo(map)
@@ -48,9 +49,10 @@ let mbb = map.getBounds();
 map.on('click', function(e) {
 	//console.log(e.latlng)
 })
-/*.on('mousemove', _.debounce(function(e) {
-	//L.marker(e.latlng).addTo(map);
-},100))*/
+.on('mousemove', function(e) {
+	let l = e.latlng.lat.toFixed(4)+' '+e.latlng.lng.toFixed(4)
+	$('.leaflet-control-attribution').text(l)
+});
 
 var drawControl = new L.Control.Draw({
 	position:'topright',
@@ -70,58 +72,60 @@ var drawControl = new L.Control.Draw({
 .addTo(map);
 
 map
-.on('draw:drawstart', function(e) {
+.on('draw:drawstart', function(ev) {
 	rr.clearLayers();
-}).on('draw:created', function (e) {
+}).on('draw:created', function (ev) {
 	
-	var type = e.layerType,
-		rect = e.layer;
+	var type = ev.layerType,
+		rect = ev.layer;
 	
 	rect.addTo(rr);
 
 	let bb = rect.getBounds();
 
-	let W = bb.getWest(),
-		E = bb.getEast(),
-		S = bb.getSouth(),
-		N = bb.getNorth();
-	
-	let prec = 2,
-		interval = 1/(Math.pow(10,prec));
-	
-	W -= Math.max((E-W)/2, interval);
-	S -= Math.max((N-S)/2, interval);
-	//E += interval;
-	//N += interval;
-	//expand bounding box of 1 interval size
+	let w = bb.getWest(),
+		e = bb.getEast(),
+		s = bb.getSouth(),
+		n = bb.getNorth();
 
-	W = parseFloat(W.toFixed(prec));
-	E = parseFloat(E.toFixed(prec));
-	S = parseFloat(S.toFixed(prec));
-	N = parseFloat(N.toFixed(prec));
+	let prec = 2,
+		int = 1/(Math.pow(10,prec));
+
+	let W = parseFloat(w.toFixed(prec));
+	let E = parseFloat(e.toFixed(prec));
+	let S = parseFloat(s.toFixed(prec));
+	let N = parseFloat(n.toFixed(prec));
+
+	let bbr = L.latLngBounds(L.latLng(N,W),L.latLng(S,E));
+
+	W = w<W ? W-int : w;
+	E = e>E ? E+int : e;
+	S = s<S ? S-int : s;
+	N = n<N ? N : n;
 
 	let color = util.textToColor([W,E,S,N].join());
 
 	let y = S;
-	
-	let rects = [];
 
-	for(let x = W; x<=E; x+=interval) {
+	var rects = {};
+	for(let x = W; x<E; x+=int) {
+
+		x = parseFloat(x.toFixed(prec))
 		
-		for(let y = S; y<=N; y+=interval) {
+		for(let y = S; y<N; y+=int) {
+
+			y = parseFloat(y.toFixed(prec))
 
 			let loc = [y,x],
-				loc2 = [y+interval, x+interval];
+				loc2 = [y+int, x+int];
 
-			rects.push([loc, loc2]);
+			rects[y+' '+x] = [loc, loc2];
 		}
 	}
-
-	console.log(rects)
 	
-	for(let r in rects) {
+	for(let i in rects) {
 		
-		let rect = L.rectangle(rects[r], {
+		let rect = L.rectangle(rects[i], {
 			color: color
 		}).addTo(pp);
 
@@ -129,7 +133,7 @@ map
 
 		L.marker(cen, {
 			icon: L.divIcon({
-				html: '<br><small>'+cen.lat.toFixed(4)+' '+cen.lng.toFixed(4)+'</small>'
+				html: '<br>'+i
 			})
 		})
 		.addTo(pp);

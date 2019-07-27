@@ -18,7 +18,7 @@
 		"webpack-dev-server": "^3.7.2"
 	},
 	"dependencies": {
-		"jquery": "^1.12.1",
+		"jquery": "^1.12.4",
 		"leaflet": "^1.5.1",
 		"leaflet-draw": "^1.0.4",
 		"lodash": "^4.17.5"
