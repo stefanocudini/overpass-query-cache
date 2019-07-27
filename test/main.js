@@ -1,5 +1,3 @@
-
-
 import _ from 'lodash';
 import $ from 'jquery';
 import 'leaflet';
@@ -8,24 +6,10 @@ import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.js';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import './main.css';
+import overpassCache from './overpassCache.js';
 
 const L = window.L;
 
-window.util = {
-	deg2rad: function(deg) {
-		return deg * (Math.PI/180);
-	},
-	meters2rad: function(m) {
-		return (m/1000)/111.12;
-	},
-	textToColor: function(str) {
-		//https://stackoverflow.com/questions/17845584/converting-a-random-string-into-a-hex-colour
-		this.color_codes = {};
-	    return (str in this.color_codes) ? this.color_codes[str] : (this.color_codes[str] = '#'+ ('000000' + (Math.random()*0xFFFFFF<<0).toString(16)).slice(-6));
-	}
-};
-//L.Icon.Default.imagePath = '.';
-// OR
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -33,6 +17,12 @@ L.Icon.Default.mergeOptions({
   iconUrl: require('leaflet/dist/images/marker-icon.png'),
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
+
+var	color_codes = {};
+function textToColor(str) {
+	//https://stackoverflow.com/questions/17845584/converting-a-random-string-into-a-hex-colour
+    return (str in color_codes) ? color_codes[str] : (color_codes[str] = '#'+ ('000000' + (Math.random()*0xFFFFFF<<0).toString(16)).slice(-6));
+}
 
 window.map = L.map('map', {
 	layers: L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
@@ -83,46 +73,10 @@ map
 
 	let bb = rect.getBounds();
 
-	let w = bb.getWest(),
-		e = bb.getEast(),
-		s = bb.getSouth(),
-		n = bb.getNorth();
+	let rects = overpassCache(bb);
 
-	let prec = 2,
-		int = 1/(Math.pow(10,prec));
+	let color = textToColor(bb.toBBoxString());
 
-	let W = parseFloat(w.toFixed(prec));
-	let E = parseFloat(e.toFixed(prec));
-	let S = parseFloat(s.toFixed(prec));
-	let N = parseFloat(n.toFixed(prec));
-
-	let bbr = L.latLngBounds(L.latLng(N,W),L.latLng(S,E));
-
-	W = w<W ? W-int : w;
-	E = e>E ? E+int : e;
-	S = s<S ? S-int : s;
-	N = n<N ? N : n;
-
-	let color = util.textToColor([W,E,S,N].join());
-
-	let y = S;
-
-	var rects = {};
-	for(let x = W; x<E; x+=int) {
-
-		x = parseFloat(x.toFixed(prec))
-		
-		for(let y = S; y<N; y+=int) {
-
-			y = parseFloat(y.toFixed(prec))
-
-			let loc = [y,x],
-				loc2 = [y+int, x+int];
-
-			rects[y+' '+x] = [loc, loc2];
-		}
-	}
-	
 	for(let i in rects) {
 		
 		let rect = L.rectangle(rects[i], {
@@ -133,7 +87,7 @@ map
 
 		L.marker(cen, {
 			icon: L.divIcon({
-				html: '<br>'+i
+				html: i
 			})
 		})
 		.addTo(pp);

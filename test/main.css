@@ -6,7 +6,9 @@
 	right: 0;
 	bottom: 0;
 }
-.leaflet-marker-icon {
+.leaflet-div-icon {
 	font-weight: bold;
 	text-shadow: 0 0 #fff;
+	background: none;
+	border:none;
 }
