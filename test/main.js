@@ -27,7 +27,7 @@ function textToColor(str) {
 window.map = L.map('map', {
 	layers: L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
 	center: [46.0740,11.1476],
-	zoom: 14
+	zoom: 15
 });
 
 var rr = L.featureGroup().addTo(map);
