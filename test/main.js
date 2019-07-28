@@ -85,20 +85,24 @@ var drawControl = new L.Control.Draw({
 
 function drawCache(bb) {
 
-	let rects = overpassCache(bb);
+	let bbs = overpassCache(bb);
+
+	console.log(bbs);
 
 	let color = textToColor(bb.toBBoxString());
 
 	let countbb = 0;
-	for(let rIndex in rects) {
+	for(let i in bbs) {
+
+		let rIndex = bbs[i][0].join();
 
 		if(rectsCache[rIndex])
 			continue;
 		else
-			rectsCache[rIndex] = rects[rIndex];
+			rectsCache[rIndex] = bbs[i];
 
 		styleCache.fillColor = color;
-		let rect = L.rectangle(rects[rIndex], styleCache)
+		let rect = L.rectangle(bbs[i], styleCache)
 		.addTo(layerCache);
 
 		//label
