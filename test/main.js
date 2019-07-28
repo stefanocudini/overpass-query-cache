@@ -30,9 +30,32 @@ window.map = L.map('map', {
 	zoom: 14
 });
 
-var rr = L.featureGroup().addTo(map)
-var pp = L.featureGroup().addTo(map)
+var rr = L.featureGroup().addTo(map);
+var ss = L.featureGroup().addTo(map);
+var pp = L.featureGroup().addTo(map);
 
+function drawRectangles(bb) {
+
+	let rects = overpassCache(bb);
+
+	let color = textToColor(bb.toBBoxString());
+
+	for(let i in rects) {
+		
+		let rect = L.rectangle(rects[i], {
+			color: color
+		}).addTo(pp);
+
+		let cen = rect.getCenter();
+
+		L.marker(cen, {
+			icon: L.divIcon({
+				html: i
+			})
+		})
+		.addTo(pp);
+	}
+}
 
 let mbb = map.getBounds();
 
@@ -55,41 +78,41 @@ var drawControl = new L.Control.Draw({
 		polygon: false
 	},
 	edit: {
-		edit: false,		
+		edit: false,
 		featureGroup: rr
 	}
 })
 .addTo(map);
 
 map
-.on('draw:drawstart', function(ev) {
+.on('draw:drawstart', function(e) {
 	rr.clearLayers();
-}).on('draw:created', function (ev) {
+}).on('draw:created', function (e) {
 	
-	var type = ev.layerType,
-		rect = ev.layer;
+	var type = e.layerType,
+		rect = e.layer;
 	
 	rect.addTo(rr);
 
 	let bb = rect.getBounds();
 
-	let rects = overpassCache(bb);
+	drawRectangles(bb);
+})
+.on('move zoom', function(e) {
 
-	let color = textToColor(bb.toBBoxString());
+	let bb = map.getBounds().pad(-0.6);
 
-	for(let i in rects) {
-		
-		let rect = L.rectangle(rects[i], {
-			color: color
-		}).addTo(pp);
+	ss.clearLayers();
 
-		let cen = rect.getCenter();
+	L.rectangle(bb, {
+		color: 'red'
+	}).addTo(ss);
 
-		L.marker(cen, {
-			icon: L.divIcon({
-				html: i
-			})
-		})
-		.addTo(pp);
-	}
+})
+.on('moveend zoomend', function(e) {
+
+	let bb = map.getBounds().pad(-0.6);
+
+	drawRectangles(bb);
+
 });
