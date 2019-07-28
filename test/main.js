@@ -30,52 +30,40 @@ window.map = L.map('map', {
 	zoom: 15
 });
 
-var rr = L.featureGroup().addTo(map);
-var ss = L.featureGroup().addTo(map);
-var pp = L.featureGroup().addTo(map);
+$('.leaflet-control-attribution').empty();
+
+var styleRect = {
+	color: 'red',
+	fill: false,
+	opacity:1,
+	weight: 3,
+	fillOpacity:0
+};
+
+var styleCache = {
+	color:'#fff',
+	opacity:1,
+	/*fillColor: RANDOM,*/
+	weight: 1,
+	fillOpacity:0.7
+}
+
+var layerDraw = L.featureGroup().addTo(map);
+
+var layerCache = L.featureGroup().addTo(map);
+
 
 var rectsCache = {};
-
-function drawRectangles(bb) {
-
-	let rects = overpassCache(bb);
-
-	let color = textToColor(bb.toBBoxString());
-
-	for(let i in rects) {
-
-		if(rectsCache[i])
-			continue;
-		else
-			rectsCache[i] = rects[i];
-		
-		let rect = L.rectangle(rects[i], {
-			color:'#000',
-			fillColor: color,
-			weight:1,
-			fillOpacity:0.6
-		}).addTo(pp);
-
-		let cen = rect.getCenter();
-
-		L.marker(cen, {
-			icon: L.divIcon({
-				html: i
-			})
-		})
-		.addTo(pp);
-	}
-}
 
 let mbb = map.getBounds();
 
 map.on('click', function(e) {
 	//console.log(e.latlng)
 })
-.on('mousemove', function(e) {
+/*.on('mousemove', function(e) {
 	let l = e.latlng.lat.toFixed(4)+' '+e.latlng.lng.toFixed(4)
-	$('.leaflet-control-attribution').text(l)
-});
+	$('.leaflet-control-attribution').text(l);
+});*/
 
 var drawControl = new L.Control.Draw({
 	position:'topright',
@@ -89,40 +77,83 @@ var drawControl = new L.Control.Draw({
 	},
 	edit: {
 		edit: false,
-		featureGroup: rr
+		featureGroup: layerDraw
 	}
 })
 .addTo(map);
 
+
+function drawCache(bb) {
+
+	let rects = overpassCache(bb);
+
+	let color = textToColor(bb.toBBoxString());
+
+	let countbb = 0;
+	for(let rIndex in rects) {
+
+		if(rectsCache[rIndex])
+			continue;
+		else
+			rectsCache[rIndex] = rects[rIndex];
+
+		styleCache.fillColor = color;
+		let rect = L.rectangle(rects[rIndex], styleCache)
+		.addTo(layerCache);
+
+		//label
+		L.marker(rect.getCenter(), {
+			icon: L.divIcon({
+				html: rIndex
+			})
+		})
+		.addTo(layerCache);
+
+		++countbb;
+	}
+
+	if(countbb>0) {
+		$('.leaflet-control-attribution')
+		.css({background: color})
+		.text(countbb+' new bboxes')
+	}
+
+	layerDraw.bringToFront();
+	layerCache.bringToBack();
+}
+
 map
+.on('draw:deletestop', function(e) {
+	layerDraw.clearLayers();
+	layerCache.clearLayers();
+})
 .on('draw:drawstart', function(e) {
-	rr.clearLayers();
-}).on('draw:created', function (e) {
+	layerDraw.clearLayers();
+})
+.on('draw:created', function (e) {
 	
 	var type = e.layerType,
 		rect = e.layer;
 	
-	rect.addTo(rr);
+	rect.setStyle(styleRect).addTo(layerDraw);
 
 	let bb = rect.getBounds();
 
-	drawRectangles(bb);
+	drawCache(bb);
 })
 .on('move zoom', function(e) {
 
 	let bb = map.getBounds().pad(-0.7);
 
-	ss.clearLayers();
+	layerDraw.clearLayers();
 
-	L.rectangle(bb, {
-		color: 'red'
-	}).addTo(ss);
+	L.rectangle(bb, styleRect).addTo(layerDraw);
 
 })
 .on('moveend zoomend', function(e) {
 
 	let bb = map.getBounds().pad(-0.7);
 
-	drawRectangles(bb);
+	drawCache(bb);
 
 });

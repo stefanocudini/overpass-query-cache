@@ -14,3 +14,8 @@
 	line-height: 10px;
 	font-size: 9px;
 }
+.leaflet-control-attribution.leaflet-control {
+	font-size: 25px;
+	font-weight: bold;
+	color:#fff;
+}
