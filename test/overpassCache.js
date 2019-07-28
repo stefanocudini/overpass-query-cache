@@ -23,9 +23,8 @@ export default function(bb) {
 	S = s<S ? S-int : s;
 	N = n>N ? N+int : n;
 
-	let y = S;
-
 	var rects = {};
+
 	for(let x = W; x<E; x+=int) {
 
 		x = fix(x)
@@ -34,10 +33,11 @@ export default function(bb) {
 
 			y = fix(y)
 
-			let loc = [y,x],
-				loc2 = [y+int, x+int];
+			let loc = [y , x],
+				loc2 = [y + int, x+int],
+				rIndex = loc.join();
 
-			rects[y+' '+x] = [loc, loc2];
+			rects[ rIndex ] = [loc, loc2];
 		}
 	}
 	
