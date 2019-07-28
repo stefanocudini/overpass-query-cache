@@ -9,26 +9,30 @@ export default function(bb) {
 	let prec = 2,
 		int = 1/(Math.pow(10,prec));
 
-	let W = parseFloat(w.toFixed(prec));
-	let E = parseFloat(e.toFixed(prec));
-	let S = parseFloat(s.toFixed(prec));
-	let N = parseFloat(n.toFixed(prec));
+	function fix(n) {
+		return parseFloat(n.toFixed(prec))
+	}
+
+	let W = fix(w);
+	let E = fix(e);
+	let S = fix(s);
+	let N = fix(n);
 
 	W = w<W ? W-int : w;
 	E = e>E ? E+int : e;
 	S = s<S ? S-int : s;
-	N = n<N ? N : n;
+	N = n>N ? N+int : n;
 
 	let y = S;
 
 	var rects = {};
 	for(let x = W; x<E; x+=int) {
 
-		x = parseFloat(x.toFixed(prec))
+		x = fix(x)
 		
 		for(let y = S; y<N; y+=int) {
 
-			y = parseFloat(y.toFixed(prec))
+			y = fix(y)
 
 			let loc = [y,x],
 				loc2 = [y+int, x+int];

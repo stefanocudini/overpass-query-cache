@@ -34,6 +34,8 @@ var rr = L.featureGroup().addTo(map);
 var ss = L.featureGroup().addTo(map);
 var pp = L.featureGroup().addTo(map);
 
+var rectsCache = {};
+
 function drawRectangles(bb) {
 
 	let rects = overpassCache(bb);
@@ -41,9 +43,17 @@ function drawRectangles(bb) {
 	let color = textToColor(bb.toBBoxString());
 
 	for(let i in rects) {
+
+		if(rectsCache[i])
+			continue;
+		else
+			rectsCache[i] = rects[i];
 		
 		let rect = L.rectangle(rects[i], {
-			color: color
+			color:'#000',
+			fillColor: color,
+			weight:1,
+			fillOpacity:0.6
 		}).addTo(pp);
 
 		let cen = rect.getCenter();
@@ -100,7 +110,7 @@ map
 })
 .on('move zoom', function(e) {
 
-	let bb = map.getBounds().pad(-0.6);
+	let bb = map.getBounds().pad(-0.7);
 
 	ss.clearLayers();
 
@@ -111,7 +121,7 @@ map
 })
 .on('moveend zoomend', function(e) {
 
-	let bb = map.getBounds().pad(-0.6);
+	let bb = map.getBounds().pad(-0.7);
 
 	drawRectangles(bb);
 
