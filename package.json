@@ -1,0 +1,22 @@
+{
+  "name": "overpass-query-cache",
+  "version": "1.0.0",
+  "description": "Bounding boxes caching system for Overpass API requests",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stefanocudini/overpass-query-cache.git"
+  },
+  "author": "Stefano Cudini stefano.cudini@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/stefanocudini/overpass-query-cache/issues"
+  },
+  "homepage": "https://github.com/stefanocudini/overpass-query-cache#readme"
+}
