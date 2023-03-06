@@ -1,5 +1,7 @@
 # Overpass Query Cache
 
+*...PROJECT WORK IN PROGRESS...*
+
 Bounding boxes caching system for Overpass API requests
 
 ## Scope
